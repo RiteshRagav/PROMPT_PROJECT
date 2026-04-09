@@ -1,0 +1,136 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: email
+    description: Email reply generation
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /email/generate:
+    post:
+      operationId: generateEmailReply
+      tags: [email]
+      summary: Generate email replies
+      description: Generate AI-powered email replies with tone control, sentiment analysis, and multiple reply variants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateEmailReplyBody"
+      responses:
+        "200":
+          description: Generated replies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateEmailReplyResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    GenerateEmailReplyBody:
+      type: object
+      properties:
+        emailContent:
+          type: string
+          description: The original email content to reply to
+        tone:
+          type: string
+          enum: [professional, friendly, firm, empathetic]
+          description: The tone for the reply
+        useCase:
+          type: string
+          enum: [general-work, customer-support, recruiter, client]
+          description: The use case context
+        length:
+          type: string
+          enum: [short, medium, detailed]
+          description: The desired reply length
+      required:
+        - emailContent
+        - tone
+        - useCase
+        - length
+    GenerateEmailReplyResponse:
+      type: object
+      properties:
+        bestReply:
+          type: string
+          description: The primary recommended reply
+        alternativeReplies:
+          type: array
+          items:
+            type: string
+          description: Two alternative reply approaches
+        shortReply:
+          type: string
+          description: Mobile-friendly 1-2 sentence version
+        suggestedSubject:
+          type: string
+          description: Suggested subject line
+        sentiment:
+          type: string
+          description: Detected sentiment of the incoming email
+        intent:
+          type: string
+          description: Detected intent of the sender
+        riskLevel:
+          type: string
+          enum: [low, medium, high]
+          description: Risk level of the email
+        riskReason:
+          type: string
+          description: Explanation of why the email is flagged as risky
+      required:
+        - bestReply
+        - alternativeReplies
+        - shortReply
+        - suggestedSubject
+        - sentiment
+        - intent
+        - riskLevel
